@@ -1,0 +1,143 @@
+DROP TABLE IF EXISTS video;
+DROP TABLE IF EXISTS contenu;
+DROP TABLE IF EXISTS chaine_youtube;
+DROP TABLE IF EXISTS utilisateur;
+DROP TABLE IF EXISTS visionnage;
+DROP TABLE IF EXISTS playlist;
+DROP TABLE IF EXISTS historique;
+DROP TABLE IF EXISTS publicite;
+DROP TABLE IF EXISTS miniature;
+DROP TABLE IF EXISTS commentaire;
+DROP TABLE IF EXISTS repcom;
+DROP TABLE IF EXISTS tag;
+DROP TABLE IF EXISTS abonnement;
+DROP TABLE IF EXISTS influence;
+DROP TABLE IF EXISTS cible;
+DROP TABLE IF EXISTS contient3;
+DROP TABLE IF EXISTS possede2;
+DROP TABLE IF EXISTS possede;
+
+create table chaine_youtube (
+	u_chaine number primary key,
+	nom_chaine varchar(50),
+	date_chaine date,
+	desc_chaine char
+);
+
+create table contenu (
+	id_contenu number primary key,
+	titre varchar(50),
+	description varchar(500),
+	fichier blob,
+	u_chaine number references chaine_youtube(u_chaine)
+);
+
+create table video(
+	id_v number primary key,
+	url char unique,
+	format char,
+	minutes number,
+	paramètres varchar(100),
+	recommendation number,
+	id_contenu number references contenu(id_contenu)
+);
+
+create table utilisateur (
+	login varchar(50) primary key,
+	nom varchar(40),
+	prenom varchar(40),
+	dateN date,
+	email varchar(100) unique,
+	tel number unique
+);
+
+create table playlist(
+	id_playlist number primary key,
+	nom_playlist varchar(30),
+	login varchar(50) references utilisateur(login)
+);
+
+create table visionnage (
+	numregard number primary key,
+	date_r date 
+);
+
+create table historique (
+	id_h number primary key,
+	video_h varchar(100)
+);
+
+create table publicite (
+	id_pub number primary key,
+	nom_publicitaire varchar(100)
+);
+
+create table miniature (
+	id_minia number primary key,
+	format char,
+	taille number,
+	fichier blob
+);
+
+create table commentaire (
+	id_comm number primary key,
+	date_c date,
+	texte varchar(500),
+	login varchar(50) references utilisateur(login)
+);
+
+create table repcom (
+	id_repcom number primary key,
+	text_rep varchar(500),
+	date_rep date,
+	login varchar(50) references utilisateur(login)
+);
+
+create table tag (
+	nom_t varchar(30) primary key
+);
+
+create table abonnement (
+	login varchar(50) references utilisateur(login),
+	u_chaine number references chaine_youtube(u_chaine),
+	primary key(login, u_chaine)
+);
+
+create table influence (
+	id_pub number references publicite(id_pub),
+	login varchar(50) references utilisateur(login),
+	primary key(id_pub, login)
+);
+
+create table cible(
+	id_pub number references publicite(id_pub),
+	login varchar(50) references utilisateur(login),
+	primary key(id_pub, login)
+);
+
+create table contient3 (
+	id_h number references historique(id_h),
+	id_v number references video(id_v),
+	primary key(id_h, id_v)
+);
+
+create table possede2 (
+	id_v number references video(id_v),
+	id_pub number references  publicite(id_v),
+	primary key(id_v, id_pub)
+);
+
+create table possede (
+	id_contenu number references contenu(id_contenu),
+	nom_t varchar(30) references tag(nom_t),
+	primary key(id_contenu, nom_t) 
+);
+
+alter table video add constraint fk_vid_minia foreign key (id_minia) references miniature(id_minia);
+alter table miniature add constraint fk_minia_vid foreign key (id_v) references video(id_v);
+alter table utilisateur add constraint fk_uti_cy foreign key (u_chaine) references chaine_youtube(u_chaine);
+alter table chaine_youtube add constraint fk_cy_uti foreign key (login) references utilisateur(login);
+alter table visionnage add constraint fk_vis_vid foreign key (id_v) references video(id_v);
+alter table video add constraint fk_vid_vis foreign key (numregard) references visionnage(numregard);
+alter table utilisateur add constraint fk_uti_his foreign key (id_h) references historique(id_h);
+alter table historique add constraint fk_his_uti foreign key (login) references utilisateur(login);
